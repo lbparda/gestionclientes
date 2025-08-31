@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-// ¡IMPORTANTE! Cambiamos el 'use' para que apunte a nuestro BaseModel
-// use Illuminate\Database\Eloquent\Model; // <-- Ya no usamos esta
-use App\Models\BaseModel; // <-- Usamos esta en su lugar, aunque no es estrictamente necesario si están en el mismo namespace.
+use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Factories\HasFactory; // Añadido por buena práctica
 
-class Expediente extends BaseModel // <-- ¡ESTE ES EL CAMBIO MÁS IMPORTANTE!
+class Expediente extends BaseModel
 {
+    use HasFactory; // Añadido por buena práctica
+
     // Nombre de la tabla en la base de datos
     protected $table = 'Expedientes';
 
@@ -23,7 +24,7 @@ class Expediente extends BaseModel // <-- ¡ESTE ES EL CAMBIO MÁS IMPORTANTE!
     // Desactivamos los timestamps (created_at y updated_at)
     public $timestamps = false;
 
-    // El array $fillable está perfecto, lo dejamos como está.
+    // Campos que se pueden rellenar masivamente
     protected $fillable = [
         "NºExpediente", "FechaEx", "Titulo", "Observaciones", "Terminado",
         "NºMinuta", "Facturado", "Cobrado", "Permitir", "LetradoCli1",
@@ -46,18 +47,13 @@ class Expediente extends BaseModel // <-- ¡ESTE ES EL CAMBIO MÁS IMPORTANTE!
         "EtiCampo9", "EtiCampo10",
     ];
 
-    // Permitimos que se use NºExpediente directamente en la URL
-    public function getRouteKeyName()
+    /**
+     * Define la relación con los documentos del expediente.
+     * ESTA ES LA FUNCIÓN CORREGIDA.
+     */
+    public function documentos()
     {
-        return 'NºExpediente';
-    }
-
-    // NO NECESITAS NADA MÁS. El BaseModel se encarga del resto.
-    public function escritos()
-    {
-        // El primer argumento es el modelo relacionado (EscritoExp).
-        // El segundo es la columna foránea en la tabla 'escritosexp' (NºExpediente).
-        // El tercero es la clave primaria en esta tabla, 'Expedientes' (NºExpediente).
-        return $this->hasMany(EscritoExp::class, 'NºExpediente', 'NºExpediente');
+        // Apunta al nuevo modelo 'DocumentacionExp'
+        return $this->hasMany(DocumentacionExp::class, 'NºExpediente', 'NºExpediente');
     }
 }

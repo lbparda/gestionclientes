@@ -2,34 +2,40 @@
 
 namespace App\Models;
 
-class Cliente extends BaseModel // <-- Asegúrate de que usa BaseModel
-{
-    protected $table = 'clientes';
-    protected $primaryKey = 'NºRef';
-    public $incrementing = false;
-    protected $keyType = 'string';
-    public $timestamps = false;
+// No necesitas heredar de BaseModel si no le añade funcionalidad específica.
+// use App\Models\BaseModel as Model;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-    // ... (tu array $fillable aquí) ...
+class Cliente extends Model
+{
+    use HasFactory;
+
+    protected $table = 'clientes';
+    protected $primaryKey = 'NºReferencia';
+    public $timestamps = false; // Tu tabla no tiene timestamps
+
     protected $fillable = [
-        "NºReferencia", "NºRef", "FechaEntrada", "Nombre", "DNI", "Dirección",
-        "Localidad", "Provincia", "CP", "TeléfonodeContacto", "TeléfonoMóvil",
-        "Fax", "Email", "Pendiente", "Observaciones", "AsuntoP", "Procurador",
-        "Historico", "Banco", "DireBanco", "LocBanco", "ProBanco", "Entidad",
-        "Sucursal", "DC", "Cuenta", "RefPro", "Poder", "Pais", "Representacion",
-        "Iguala", "FNacimiento", "IBAN", "Procedencia"
+        'NºRef', 'Nombre', 'DNI', 'Dirección', 'Localidad', 'Provincia', 'CP',
+        'TeléfonodeContacto', 'TeléfonoMóvil', 'Email' // etc.
     ];
 
-
+    /**
+     * Define la relación correcta de muchos a muchos con Expediente.
+     */
     public function getRouteKeyName()
     {
         return 'NºRef';
     }
-
     public function expedientes()
     {
-        return $this->hasMany(DExpCli::class, 'RefCliente', 'NºRef');
+        return $this->belongsToMany(
+            Expediente::class,      // El modelo final al que queremos llegar
+            'DExpCli',              // La tabla intermedia (pivote)
+            'RefCliente',           // La clave foránea en la tabla pivote que se refiere a ESTE modelo (Cliente)
+            'NºExpediente',         // La clave foránea en la tabla pivote que se refiere al OTRO modelo (Expediente)
+            'NºRef',                // La clave en ESTA tabla (clientes) con la que se relaciona la tabla pivote
+            'NºExpediente'          // La clave en la OTRA tabla (Expedientes) con la que se relaciona la tabla pivote
+        );
     }
-
-    // NO se necesita el array $casts.
 }
